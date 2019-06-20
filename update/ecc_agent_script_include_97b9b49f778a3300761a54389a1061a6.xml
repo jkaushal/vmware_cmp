@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="ecc_agent_script_include">
+    <ecc_agent_script_include action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Script for CAPI - VMWare Content API.ListDatastores</description>
+        <name>vmware-compute-2.0-ListDatastores</name>
+        <script/>
+        <sys_class_name>ecc_agent_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2019-06-20 07:25:24</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>97b9b49f778a3300761a54389a1061a6</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>vmware-compute-2.0-ListDatastores</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="VMWare Scripted API" source="sn_vmware_scripted">44c3385b778a3300761a54389a10619c</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="VMWare Scripted API">44c3385b778a3300761a54389a10619c</sys_scope>
+        <sys_update_name>ecc_agent_script_include_97b9b49f778a3300761a54389a1061a6</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2019-06-20 07:25:24</sys_updated_on>
+    </ecc_agent_script_include>
+</record_update>

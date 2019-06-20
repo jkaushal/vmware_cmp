@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sn_capi_method_mapper">
+    <sn_capi_method_mapper action="INSERT_OR_UPDATE">
+        <capi_interface_operation display_value="CreateSnapshot">847800740b3222004b1b812f15673a14</capi_interface_operation>
+        <cloud_api display_value="VMWare Content API">feb9749f778a3300761a54389a10615f</cloud_api>
+        <endpoint_operation display_value="ExecuteScript">48ceec0f0b1322003969a387b6673a87</endpoint_operation>
+        <is_execute_script_on_instance>false</is_execute_script_on_instance>
+        <request_script>d7b9b49f778a3300761a54389a106199</request_script>
+        <script_table>ecc_agent_script_include</script_table>
+        <script_type>JS</script_type>
+        <supported_in_version>2.0</supported_in_version>
+        <sys_class_name>sn_capi_method_mapper</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2019-06-20 07:25:24</sys_created_on>
+        <sys_id>d7b9b49f778a3300761a54389a10619b</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>847800740b3222004b1b812f15673a14</sys_name>
+        <sys_package display_value="VMWare Scripted API" source="sn_vmware_scripted">44c3385b778a3300761a54389a10619c</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="VMWare Scripted API">44c3385b778a3300761a54389a10619c</sys_scope>
+        <sys_update_name>sn_capi_method_mapper_d7b9b49f778a3300761a54389a10619b</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2019-06-20 07:25:24</sys_updated_on>
+    </sn_capi_method_mapper>
+</record_update>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="ecc_agent_script_include">
+    <ecc_agent_script_include action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Base object for VMWare-Vcenter Web Services APIs.</description>
+        <name>VMWareRestCloudAPIBase</name>
+        <script><![CDATA[var VMWareRestCloudAPIBase = Class.create();
+VMWareRestCloudAPIBase.prototype = Object.extendsObject(CloudAPIBase, {
+
+	/**
+	 * Parameters and headers are expected to come from the exchange from the blueprint
+	 * orchestrator on the instance side.
+	 */
+	initialize: function(parameters, headers) {
+		this.parameters = parameters;
+		this.headers = headers;
+		this.endpoint = this.parameters.get('Endpoint').replace('/sdk','').trim();
+		this.cloudApiBase = new CloudAPIBase();
+		this.sessionId= this._login();
+	},
+
+	/**
+	 * Invoke Rest API Get
+	*/
+	invokeGet: function(apiPath){
+		var vmwareRequest= this.cloudApiBase.fetchClient(encodeURI(this.endpoint+apiPath));
+		vmwareRequest.addHeader("vmware-api-session-id",this.sessionId);
+		vmwareRequest.addHeader("Content-Type", "application/json");
+		var vmwareRequestOutput= vmwareRequest.get();
+		var response = this._getResponse(vmwareRequestOutput);
+		//this.logout();
+		return response;
+	},
+
+	/**
+	 * VMWare "POST" Endpoint
+	*/
+	invokePost: function(apiPath,payload){
+		var vmwareRequest= this.cloudApiBase.fetchClient(encodeURI(this.endpoint+apiPath));
+		vmwareRequest.addHeader("vmware-api-session-id",this.sessionId);
+		vmwareRequest.addHeader("Content-Type", "application/json");
+		var vmwareOutput= vmwareRequest.post(payload);
+		var response = this._getResponse(vmwareOutput);
+		//this.logout();
+		return response;
+	},
+	/**
+	 * VMWare "POST" Endpoint
+	*/
+	
+	logout: function(){
+		var vmwareRequest= this.cloudApiBase.fetchClient(encodeURI(this.endpoint+"/rest/com/vmware/cis/session"));
+		vmwareRequest.addHeader("vmware-api-session-id",this.sessionId);
+		vmwareRequest.addHeader("Content-Type", "application/json");
+        var auth_response = vmwareRequest.del();
+		var status = auth_response.getStatusCode();
+		ms.log('@JK0001 Status for Session  Termination '+status);
+		var responseBody = auth_response.getBody();
+		ms.log('@JK001 Response for Session  Termination '+responseBody);
+		if(status < '200' || status >= '300' ){
+			throw new CMPVMwareAPIException(responseBody, status);
+		}
+	},
+
+	_login: function(){
+		var StringUtil= Packages.com.glide.util.StringUtil;
+		var userName = this.parameters.get('Identity');
+		var password = this.parameters.get('Credentials');
+		var basicAuth = 'Basic '+StringUtil.base64Encode(userName+":"+password);
+		var request = this.cloudApiBase.fetchClient(encodeURI(this.endpoint+'/rest/com/vmware/cis/session'));
+		request.addHeader("Authorization",basicAuth);
+		request.addHeader("Content-Type", "application/json");
+		var auth_response = request.post({});
+		var status = auth_response.getStatusCode();
+		var responseBody = auth_response.getBody();
+		if(status < '200' || status >= '300' ){
+			throw new CMPVMwareAPIException(responseBody, status);
+		}
+		var jsonObj = new JSON().decode(responseBody);
+		var session_id =  jsonObj['value'];
+		return session_id;
+	},
+	
+	
+	/**
+ 		* HTTP Responses are parssed.
+ 	*/
+	_getResponse: function(response){
+		var status = response.getStatusCode();
+		var responseBody = response.getBody();
+		ms.log("@JK001************** VMWare Response"+status);
+		if(status < '200' || status >= '300' ){
+			throw new CMPVMwareAPIException(responseBody, status);
+		}
+
+		else{
+			var jsonObj = new JSON().decode(responseBody);
+			return jsonObj;
+		}
+
+	},
+
+	type: 'VMWareRestCloudAPIBase'
+});]]></script>
+        <sys_class_name>ecc_agent_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2019-06-20 07:30:48</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>769abc9f778a3300761a54389a10618e</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>VMWareRestCloudAPIBase</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="VMWare Scripted API" source="sn_vmware_scripted">44c3385b778a3300761a54389a10619c</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="VMWare Scripted API">44c3385b778a3300761a54389a10619c</sys_scope>
+        <sys_update_name>ecc_agent_script_include_769abc9f778a3300761a54389a10618e</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2019-06-20 07:30:48</sys_updated_on>
+    </ecc_agent_script_include>
+</record_update>

@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="ecc_agent_script_include">
+    <ecc_agent_script_include action="INSERT_OR_UPDATE">
+        <active>true</active>
+        <description>Script for CAPI - vSphere Rest Content API&#13;
+&#13;
+For Virtual Server related API.&#13;
+https://vdc-download.vmware.com/vmwb-repository/dcr-public/1cd28284-3b72-4885-9e31-d1c6d9e26686/71ef7304-a6c9-43b3-a3cd-868b2c236c81/doc/index.html#PKG_com.vmware.vcenter.vm&#13;
+&#13;
+For Tagging related API:&#13;
+https://vdc-download.vmware.com/vmwb-repository/dcr-public/1cd28284-3b72-4885-9e31-d1c6d9e26686/71ef7304-a6c9-43b3-a3cd-868b2c236c81/doc/index.html#PKG_com.vmware.cis.tagging&#13;
+&#13;
+</description>
+        <name>VMWareRestAPI</name>
+        <script><![CDATA[// 04-16-2019 - EW Changes
+// Renamed getTag and getCategory to getTabById and getCategoryById to reflect how they function and differentiate fetching by name
+// Updated getTagByName to search the response for the tag requested by name given a particular category
+// Added getCategoryByName to locate a given category by its name
+// Add assign Tags function which takes a JSON list of tag key/values and turns them into VMWare categories/tags and then assigns them to the resource
+
+
+var VMWareRestAPI = Class.create();
+VMWareRestAPI.prototype = Object.extendsObject(VMWareRestCloudAPIBase, {
+
+	initialize: function(parameters, headers) {
+		this.parameters = parameters;
+		this.headers = headers;
+		VMWareRestCloudAPIBase.prototype.initialize.call(this, parameters, headers);
+	},
+
+// 	startNode: function(){
+// 		//var vmId = 'vm-803612';
+// 		// apply these below tags on specific server.
+// 		var tags = ['Non-Prod','SQL Server'];
+// 		var catId = 'urn:vmomi:InventoryServiceCategory:48ee79c7-420f-4c09-a9ac-e126086cf776:GLOBAL';
+// 		// 				var tagId = this.parameters.get('NodeID');
+// 		// i need these 2 guys -- jayant.
+// 		var vmId = 'vm-11677';
+// 		var tagId = 'urn:vmomi:InventoryServiceTag:2fdf119b-d650-4c8a-961b-286794c9e5a7:GLOBAL';
+// 		// 		return this.getVirtualMachine(vmId);
+// 		// 		return this.listAttachedTags(vmId);
+// 		// 		return this.createTag(catId,'servicenow');
+// 		// 				return this.listCategories();
+
+// 		// 		return this.listTags();
+// 		// 		var tags = new JSON().encode(tags1[0]);
+// 		// 		var tagList = [];
+
+// 		// 		var values = tags[0];
+// 		// 		tagList.push(tags1[0]);
+// 		// 		for(var tagIndex in values){
+// 		// 			var vall = values[tagIndex];
+// 		// 			tagList.push(vall);
+// 		// 			//gs.info(vall);
+// 		// 		}
+
+
+// 		// 		var values = .
+// 		// 		return tagList;
+// 		// 		return this.getTag(tagId);
+// 		// 		return this.createCategory('servicenowtags');
+// 		// 		return this.invokePowerOperations(vmId);
+// 		return this.getTagByName(vmId);
+
+
+// 	},
+	// Assign tags to a given resource IF the equivalent category and tag values already exist in VMWare
+	//  Placeholder inputs to trigger creation of categories and/or tags if none found put in but not implemented
+	assignTags: function(resourceId,tagsJSON,createCategories,createTags,resourceType){
+		var catagories = [];
+		var tagsObj = new JSON().decode(tagsJSON);
+		try{
+			for (var categoryName in tagsObj){
+				var categoryId = this.getCategoryByName(categoryName);
+				if (!categoryId) continue;
+				var tagId = this.getTagByNameWithCategory(categoryId,tagsObj[categoryName]);
+				if (!tagId) continue;
+				this.attchTagToResource(resourceId,tagId,resourceType);
+			}
+		}catch(e){
+			return e;
+		}
+		return this.listAttachedTags(resourceId,resourceType);	
+	},
+
+	// Returns the ID for a tag of the given name and category ID if any exists
+
+	getTagByNameWithCategory: function(categoryId,tagName){
+		// Get all the tags for a given category
+		// 		var queryPath = '/rest/com/vmware/cis/tagging/tag';
+		var payload = {};
+		var queryPath = '/rest/com/vmware/cis/tagging/tag/id:'+categoryId+'?~action=list-tags-for-category';
+		var response =this.invokePost(queryPath,new JSON().encode(payload));
+		var catog= [];
+		// Did we get a value array back?  Does it have values?
+		if (response.value && response.value.length > 0) {
+			var valueArray = response.value;
+			// Go through each returned value - find see if we can find our tag
+			for (var i=0; i< valueArray.length; i++){
+				// The tag list only returns IDs - now we have to go get the name and check it
+				var response_2 = this.getTagById(valueArray[i]);
+				// Did we get a value back in the response?  Does it have a name?  Does the name match the tag we are looking for?  If so RETURN IT!
+				if (response_2.value && response_2.value.name && response_2.value.name == tagName) return valueArray[i];
+			}
+		}
+		// No tags defined OR no tags were found - return nothing!
+		return "";
+	},
+
+	// Returns the ID for the category of a given name (if any exists)
+	getCategoryByName: function(categoryName){
+		var queryPath = '/rest/com/vmware/cis/tagging/category';
+		var response = this.invokeGet(queryPath);
+		// Did we get a value array back?  Does it have values?
+		if (response.value && response.value.length > 0) {
+			var valueArray = response.value;
+			// Go through each returned value - find see if we can find our category
+			for (var i=0; i< valueArray.length; i++){
+				var response_2 = this.getCategoryById(valueArray[i]);
+				// Did we get a value back in the response?  Does it have a name?  Does the name match the category we are looking for?  If so RETURN IT!
+				if (response_2.value && response_2.value.name && response_2.value.name == categoryName) return valueArray[i];
+			}
+		}
+		// No categories defined OR no categories were found - return nothing!
+		return "";
+	},
+	listTagNames: function(){
+		var response = this.invokeGet('/rest/com/vmware/cis/tagging/tag');
+		var tags = [];
+		if (response.value && response.value.length > 0) {
+			var valueArray = response.value;
+			// Go through each returned value - find see if we can find our category
+			for (var i=0; i< valueArray.length; i++){
+				tags.push(valueArray[0]);
+				// Did we get a value back in the response?  Does it have a name?  Does the name match the category we are looking for?  If so RETURN IT!
+				// 				if (response_2.value && response_2.value.name && response_2.value.name == categoryName) return valueArray[i];
+			}
+		}
+		// No categories defined OR no categories were found - return nothing!
+		return tags;
+	},
+
+	attchTagToResource: function(objectId,tag_id,resourceType){
+		var apiPath = '/rest/com/vmware/cis/tagging/tag-association/id:'+tag_id+'?~action=attach';
+		var payload= {"object_id":{"id":objectId,"type":resourceType}};
+		this.invokePost(apiPath,new JSON().encode(payload));
+	},
+	listAttachedTags: function(objectId,resourceType){
+		var apiPath = '/rest/com/vmware/cis/tagging/tag-association?~action=list-attached-tags-on-objects';
+		var payload= {"object_ids":[{"id":objectId,"type":resourceType}]};
+		return this.invokePost(apiPath,new JSON().encode(payload));
+	},
+	createTag: function(categoryId,tagName){
+		var apiPath = '/rest/com/vmware/cis/tagging/tag';
+		var description = 'ServiceNow CMP Category';
+		var payload= {"create_spec":{"category_id":categoryId,"description":description,"name":tagName}};
+		return this.invokePost(apiPath,new JSON().encode(payload));
+	},
+	listTags: function(){
+		return this.invokeGet('/rest/com/vmware/cis/tagging/tag');
+	},
+	getTagById: function(id){
+		return this.invokeGet('/rest/com/vmware/cis/tagging/tag/id:'+id);
+	},
+	getVirtualMachine: function(vmId){
+		return this.invokeGet('/rest/vcenter/vm/'+vmId);
+	},
+	getVirtualMachinePowerState: function(vmId){
+		var apiPath = '/rest/vcenter/vm/'+vmId+'/power';
+		return this.invokeGet(apiPath);
+	},
+	changeVirtualMachinePowerState: function(vmId,state){
+		var apiPath = '/rest/vcenter/vm/'+vmId+'/power/'+state;
+		return this.invokePost(apiPath,{});
+	},
+
+	listCategories: function(){
+		return this.invokeGet('/rest/com/vmware/cis/tagging/category');
+	},
+
+	createCategory: function(name){
+		var apiPath = '/rest/com/vmware/cis/tagging/category';
+		var payload= {"create_spec":{"associable_types":[],"cardinality":"SINGLE","description":"ServiceNow Test","name":name}};
+		return this.invokePost(apiPath,new JSON().encode(payload));
+	},
+	getCategoryById: function(catId){
+		var apiPath = '/rest/com/vmware/cis/tagging/category/id:'+catId;
+		return this.invokeGet(apiPath);
+	},
+	invokePowerOperations: function(vmId){
+		// var state = ['start','stop','suspend','reset'];
+		// return this.changeVirtualMachinePowerState(vmId,state[0]);
+		// return this.getVirtualMachinePowerState(vmId);
+	},
+	startNode: function(vmId){
+		// var state = ['start','stop','suspend','reset'];
+		this.changeVirtualMachinePowerState(vmId,"start");
+		return this.getVirtualMachine(vmId);
+	},
+	stopNode: function(vmId){
+		// var state = ['start','stop','suspend','reset'];
+		this.changeVirtualMachinePowerState(vmId,"stop");
+		return this.getVirtualMachine(vmId);
+	},
+	suspendNode: function(vmId){
+		// var state = ['start','stop','suspend','reset'];
+		this.changeVirtualMachinePowerState(vmId,"suspend");
+		return this.getVirtualMachine(vmId);
+	},
+
+	type: "VMWareRestAPI"
+});]]></script>
+        <sys_class_name>ecc_agent_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2019-06-20 07:31:47</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>2b1b70df778a3300761a54389a106194</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>VMWareRestAPI</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="VMWare Scripted API" source="sn_vmware_scripted">44c3385b778a3300761a54389a10619c</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="VMWare Scripted API">44c3385b778a3300761a54389a10619c</sys_scope>
+        <sys_update_name>ecc_agent_script_include_2b1b70df778a3300761a54389a106194</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2019-06-20 07:35:47</sys_updated_on>
+    </ecc_agent_script_include>
+</record_update>
