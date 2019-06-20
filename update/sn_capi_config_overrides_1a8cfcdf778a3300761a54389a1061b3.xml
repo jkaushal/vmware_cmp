@@ -2,18 +2,18 @@
     <sn_capi_config_overrides action="INSERT_OR_UPDATE">
         <cloud_api display_value="VMWare Content API">feb9749f778a3300761a54389a10615f</cloud_api>
         <config_parameter display_value="Credentials">71684c340b3222004b1b812f15673aa0</config_parameter>
-        <override_value>Credentials</override_value>
+        <override_value>$(CloudCredential.password)</override_value>
         <sys_class_name>sn_capi_config_overrides</sys_class_name>
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2019-06-20 07:37:49</sys_created_on>
         <sys_id>1a8cfcdf778a3300761a54389a1061b3</sys_id>
-        <sys_mod_count>0</sys_mod_count>
-        <sys_name>Credentials</sys_name>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>$(CloudCredential.password)</sys_name>
         <sys_package display_value="VMWare Scripted API" source="sn_vmware_scripted">44c3385b778a3300761a54389a10619c</sys_package>
         <sys_policy/>
         <sys_scope display_value="VMWare Scripted API">44c3385b778a3300761a54389a10619c</sys_scope>
         <sys_update_name>sn_capi_config_overrides_1a8cfcdf778a3300761a54389a1061b3</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2019-06-20 07:37:49</sys_updated_on>
+        <sys_updated_on>2019-06-20 07:59:30</sys_updated_on>
     </sn_capi_config_overrides>
 </record_update>
