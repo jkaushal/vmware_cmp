@@ -8,7 +8,8 @@
 function startNode(){
 	var registerNodePayload = {};
 	var vmwareApi = new VMWareRestAPI(this.parameters, this.headers);
-	var startNode = vmwareApi.startNode();
+	var nodeId = this.parameters.get('NodeID');
+	var startNode = vmwareApi.startNode(nodeId);
 	return startNode;
 }]]></script>
         <sys_class_name>ecc_agent_script_include</sys_class_name>
@@ -17,14 +18,14 @@ function startNode(){
         <sys_domain>global</sys_domain>
         <sys_domain_path>/</sys_domain_path>
         <sys_id>2bb9b49f778a3300761a54389a1061d1</sys_id>
-        <sys_mod_count>1</sys_mod_count>
+        <sys_mod_count>2</sys_mod_count>
         <sys_name>vmware-compute-2.0-StartNode</sys_name>
         <sys_overrides/>
         <sys_package display_value="VMWare Scripted API" source="sn_vmware_scripted">44c3385b778a3300761a54389a10619c</sys_package>
         <sys_policy/>
         <sys_scope display_value="VMWare Scripted API">44c3385b778a3300761a54389a10619c</sys_scope>
         <sys_update_name>ecc_agent_script_include_2bb9b49f778a3300761a54389a1061d1</sys_update_name>
-        <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2019-06-20 07:33:14</sys_updated_on>
+        <sys_updated_by>jayant.kaushal@snc</sys_updated_by>
+        <sys_updated_on>2019-06-24 08:01:32</sys_updated_on>
     </ecc_agent_script_include>
 </record_update>
